@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project 5: NeRF</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        header {
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            padding: 1em 0;
+        }
+        .container {
+            width: 80%;
+            margin: auto;
+            overflow: hidden;
+        }
+        section {
+            padding: 20px;
+            background-color: #fff;
+            margin: 20px 0;
+        }
+        img {
+            max-width: 100%;
+        }
+    </style>
+    
+</head>
+<body>
+
+    <div class="container">
+    <h1>Project 5: NeRFs</h1>
+    
+    <h2>Table of Contents:</h2>
+    
+    <ol>
+        <li>Part 1: 2D</li>
+        <ol>
+            <li>Model Architecture</li>
+            <li>Results</li>
+            <li>Varying Hyperparameters</li>
+        </ol>
+
+        
+        
+        <li>Part 2: Fitting a NeRF from Multi-view Images</li>
+
+        
+
+        <ol>
+            <li>2.1: Rays from Cameras</li>
+            <li>2.2: Sampling</li>
+            <li>2.3: Putting the Dataloading Together</li>
+            <li>2.4: NeRFs</li>
+            <li>2.5: Volume Rendering</li>
+        </ol>
+    </ol>
+
+    <h2>Part 1</h2>
+    <section>
+    <h3>Model Architecture</h3>
+
+    
+        <p>My architecture was identical to the one provided. First, I positionally encoded the x,y values. Then, I had 3 Fully connected Linear/Relu blocks, and finally, a 3 neuron Linear layer with a sigmoid at the end. I ended up with the following PSNR. I ended up using L = 10, learning rate = 1e-2, and 4 layers.</p>
+        
+        <img style="width: 250px; height: 200px;" src="data/architecture.png">
+        <img style="width: 250px; height: 200px;" src="data/psnrfox.png">
+        
+        <h3>Visualization</h3>
+
+        <img style="width: 250px; height: 200px;" src="data/mainfox0.jpg">
+        <img style="width: 250px; height: 200px;" src="data/mainfox1.jpg">
+        <img style="width: 250px; height: 200px;" src="data/mainfox2.jpg">
+        <img style="width: 250px; height: 200px;" src="data/mainfox3.jpg">
+        <img style="width: 250px; height: 200px;" src="data/mainfox4.jpg">
+    <h3>Varying Hyperparameters</h3>
+    <p> I first varied lr. For 0.1, 0.01, and 0.001, my losses were 0.2151, 0.0021, and 0.0018 and respectively.</p>
+    <p> Then, I varied L. For L = 10, 7, 4, my final losses were 0.0021, 0.0030, and 0.0035. </p>
+    <p> Here, I used L = 7 and lr = 0.01.</p>
+        <img style="width: 250px; height: 200px;" src="data/subopt0.jpg">
+        <img style="width: 250px; height: 200px;" src="data/subopt1.jpg">
+        <img style="width: 250px; height: 200px;" src="data/subopt2.jpg">
+        <img style="width: 250px; height: 200px;" src="data/subopt3.jpg">
+        <img style="width: 250px; height: 200px;" src="data/subopt4.jpg">
+        <p> Here, I used L = 4 and lr = 0.01.</p>
+        <img style="width: 250px; height: 200px;" src="data/notgood0.jpg">
+        <img style="width: 250px; height: 200px;" src="data/notgood1.jpg">
+        <img style="width: 250px; height: 200px;" src="data/notgood2.jpg">
+        <img style="width: 250px; height: 200px;" src="data/notgood3.jpg">
+        <img style="width: 250px; height: 200px;" src="data/notgood4.jpg">
+    
+        <h3>Ekko</h3>
+    <p> Here, I did the same operation on Ekko from league of legends.</p>
+    <img style="width: 300px; height: 200px;" src="data/mainekko0.jpg">
+    <img style="width: 300px; height: 200px;" src="data/mainekko1.jpg">
+    <img style="width: 300px; height: 200px;" src="data/mainekko2.jpg">
+    <img style="width: 300px; height: 200px;" src="data/mainekko3.jpg">
+    <img style="width: 300px; height: 200px;" src="data/mainekko4.jpg">
+
+    <p> This was my training PSNR.</p>
+    <img style="width: 300px; height: 200px;" src="data/ekkopnr.png">
+    <p> </p>
+    </section>
+<section>
+    <h2>Part 2</h2>
+    <h3>2.1 Creating Rays From Cameras</h3>
+    <p>Here, I implemented pixel_to_rays, transform, and pixel_to_cameras.</p>
+    <p>In pixel_to_cameras, I just inverted K and applied it to s times our coordinate matrix.
+        In pixel_to_ray, I got R_inverse from c2w and applied it to get R_r, and then normalized the difference from r0 and the coordinate.
+    </p>
+    
+    
+    <h3>2.2 Sampling</h3>
+    <p>Here, I sampled rays by using the previous three functions, and then used the formula specified to sample along the rays. </p>
+    
+
+    <h3>2.3 Putting the Dataloading All Together</h3>
+    <p>Here, I integrated the previous two functions with the data to generate rays.</p>
+    <img style="width: 250px; height: 200px;" src="data/rays.png">
+    <img style="width: 250px; height: 200px;" src="data/rays2.png">
+
+    <h4>2.4 NeRF</h3>
+    <p>This was my model architecture. I also had to sinusoidally positionally encode all inputs, which I batched by first broadcasting the arguments for sin and cosine and then applying sin and cosine to certain indices. My model implemented this architecture exactly, and in my training loop, I positionally encoded a random subset of the ray samples and directions, rendered the output of the network and calculated the loss, and then used the gradient to move forward. I used the Adam optimizer with lr=5e-4.</p>
+    <img style="width: 250px; height: 200px;" src="data/architecture2.png ">
+    
+
+    <h3>2.5 Volume Rendering</h3>
+    <p>In this task, I rendered images of the lego car using my trained model. In my sample along rays, I return a delta array that has the deltas for every single interval, which I use with the density and color from my network and the formula given to calculate. </p>
+    <img style="width: 300px; height: 200px;" src="data/final0.jpg">
+    <img style="width: 300px; height: 200px;" src="data/final1.png">
+    <img style="width: 300px; height: 200px;" src="data/final3.jpg">
+    <img style="width: 300px; height: 200px;" src="data/final2.png">
+    <img style="width: 300px; height: 200px;" src="data/final4.jpg">
+    <img style="width: 300px; height: 200px;" src="data/SPINNY.gif">
+
+    <p>This was my validation PSNR after two training sessions, each with 5000 iterations. The x axis is by 500 iterations.</p>
+    <img style="width: 300px; height: 200px;" src="data/validationpsnr1.png">
+    <img style="width: 300px; height: 200px;" src="data/validationpsnr2.png">
+
+
+    
+    
+
+
+</section>
+
+</div>
+
+
+
+
+
+</body>
+</html>

@@ -1,5 +1,1 @@
-Daniel George
-3035698366
-danielgeorge@berkeley.edu
-index.html
-P5.ipynb = entire codebase 
+P5.ipynb contains all code needed to reproduce results. Results are presented and visualized in index.html.
